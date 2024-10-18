@@ -20,7 +20,7 @@ jobs:
   #         password: ${{ secrets.DOCKERHUB_TOKEN }}
   build:
     runs-on: ubuntu-latest
-    needs: login
+    # needs: login
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
