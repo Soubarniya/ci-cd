@@ -1,0 +1,78 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.20'
+
+      - name: Build Go API
+        run: go build -v
+
+      - name: Build Docker image
+        run: |
+          docker build -t soubarniya/go-api:latest .
+          echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+          docker push soubarniya/go-api:latest
+
+  scan_code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.20'
+
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+          golangci-lint --version
+
+      - name: Run code scanning with golangci-lint
+        run: |
+          golangci-lint run ./...
+
+  scan_image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker Buildx Setup
+        uses: docker/setup-buildx-action@v1
+
+      - name: Docker Scan
+        run: |
+          echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+          docker scan your-dockerhub-username/go-api:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+      - name: Set up kubeconfig for Minikube
+        run: |
+          mkdir -p ~/.kube
+          echo "$MINIKUBE_KUBECONFIG" > ~/.kube/config
+        env:
+          MINIKUBE_KUBECONFIG: ${{ secrets.MINIKUBE_KUBECONFIG }}
+      - name: Deploy to Minikube
+        run: |
+          kubectl apply -f k8s-deployment.yaml
