@@ -9,6 +9,15 @@ on:
       - main
 
 jobs:
+  login:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
   build:
     runs-on: ubuntu-latest
     steps:
@@ -25,7 +34,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+          docker build -t soubarniya/go-api:latest .
           docker push soubarniya/go-api:latest
 
   scan_code:
@@ -58,8 +67,7 @@ jobs:
 
       - name: Docker Scan
         run: |
-          echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin
-          docker scan your-dockerhub-username/go-api:latest
+          docker scan soubarniya/go-api:latest
 
   deploy:
     runs-on: ubuntu-latest
