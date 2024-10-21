@@ -121,4 +121,3 @@ jobs:
           minikube start || true # Start Minikube if not already running
           kubectl apply -f /root/test.yaml  # Adjust this path
           EOF
-#comment
