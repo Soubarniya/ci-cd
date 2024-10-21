@@ -81,6 +81,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: scan_code
     steps:
+      - name: Cache Trivy DB
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/trivy
+          key: ${{ runner.os }}-trivy-db
+          
       - name: Install Trivy
         run: |
           sudo apt-get update -y
