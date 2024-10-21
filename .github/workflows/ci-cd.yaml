@@ -43,7 +43,7 @@ jobs:
         run: |
           docker build -t soubarniya/go-api:latest .
           docker push soubarniya/go-api:latest
-  sonarcloud:
+  scan_code:
     runs-on: ubuntu-latest
     needs: build
     steps:
