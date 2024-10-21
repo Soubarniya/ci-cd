@@ -43,27 +43,39 @@ jobs:
         run: |
           docker build -t soubarniya/go-api:latest .
           docker push soubarniya/go-api:latest
-
-  scan_code:
+  sonarcloud:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+        # Disabling shallow clone is recommended for improving relevancy of reporting
+        fetch-depth: 0
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@<action version> # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/sonarcloud-scan
+      env:
+        SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.20'
+  # scan_code:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
 
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
-          golangci-lint --version
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v2
+  #       with:
+  #         go-version: '1.20'
 
-      - name: Run code scanning with golangci-lint
-        run: |
-          golangci-lint run ./...
+  #     - name: Install int
+  #       run: |
+  #         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.50.1
+  #         golangci-lint --version
+
+  #     - name: Run code scanning with golangci-lint
+  #       run: |
+  #         golangci-lint run ./...
 
   scan_image:
     runs-on: ubuntu-latest
