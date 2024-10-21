@@ -1,14 +1,14 @@
-# name: CI/CD Pipeline
-# #update token policy
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
+name: CI/CD Pipeline
+#update token policy
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-# jobs:
+jobs:
 #   # login:
 #   #   runs-on: ubuntu-latest
 #   #   steps:
