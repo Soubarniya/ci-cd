@@ -118,7 +118,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
           minikube start || true  # Start Minikube if not already running
-          kubectl apply -f /root/k8s-deployment.yaml  # Adjust this path
+          kubectl apply -f ./k8s-deployment.yaml  # Adjust this path
           EOF
     
       - name: Verify Deployment
