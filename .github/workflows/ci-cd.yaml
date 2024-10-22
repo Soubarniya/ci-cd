@@ -102,7 +102,7 @@ jobs:
 
       - name: Scan Docker image with Trivy
         run: |
-          trivy image soubarniya/go-api:latest
+          trivy image --cache-dir ~/.cache/trivy soubarniya/go-api:latest
 
   deploy:
     runs-on: ubuntu-latest
