@@ -126,4 +126,3 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
           kubectl get pods -n default
           EOF
-#changes 
