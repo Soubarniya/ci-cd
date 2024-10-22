@@ -109,12 +109,7 @@ jobs:
     needs: scan_image
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up kubectl 
-        uses: azure/setup-kubectl@v3 
-        with: 
-          version: 'v1.27.1'
+        uses: actions/checkout@v3
           
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
