@@ -115,7 +115,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-          
+      - name: list out files
+        run: pwd && ls -la
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
