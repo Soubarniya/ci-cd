@@ -127,13 +127,14 @@ jobs:
       - name: Copy manifest to server
         run: |
           echo "Copying k8s-deployment.yaml to remote server..."
-          scp -v -o StrictHostKeyChecking=no ./k8s-deployment.yaml "${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}": ./k8s-deployment.yaml
+          scp -v -o StrictHostKeyChecking=no ./k8s-deployment.yaml "${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}:~/k8s-deployment.yaml"
           echo "Verifying file on the remote server..."
           ssh -o StrictHostKeyChecking=no "${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}" << 'EOF'
             ls -l ~/k8s-deployment.yaml
             echo "Listing files in the home directory:"
             ls -l ~/
           EOF
+
       
       - name: Deploy to Minikube
         run: |
