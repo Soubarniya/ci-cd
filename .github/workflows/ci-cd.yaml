@@ -125,19 +125,8 @@ jobs:
       - name: Add server to known_hosts
         run: |
           ssh-keyscan -H ${{ secrets.REMOTE_SERVER_IP }} >> ~/.ssh/known_hosts
+          
 
-      - name: Copy manifest to server
-        run: |
-          echo "Copying k8s-deployment.yaml to remote server..."
-          scp -v -o StrictHostKeyChecking=no ./k8s-deployment.yaml "${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}:/root/k8s-deployment.yaml"
-          echo "Verifying file on the remote server..."
-          ssh -o StrictHostKeyChecking=no "${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}" << 'EOF'
-            ls -l ./k8s-deployment.yaml
-            echo "Listing files in the home directory:"
-            ls -l ./
-          EOF
-
-      
       - name: Deploy to Minikube
         run: |
             ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
