@@ -127,7 +127,10 @@ jobs:
       - name: Copy manifest to server
         run: |
           scp -v -o StrictHostKeyChecking=no ./k8s-deployment.yaml ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}: ./k8s-deployment.yaml
-
+      - name: Debug SSH Variables
+        run: |
+          echo "User: ${{ secrets.REMOTE_SERVER_USER }}"
+          echo "IP: ${{ secrets.REMOTE_SERVER_IP }}"
           
       - name: Deploy to Minikube
         run: |
