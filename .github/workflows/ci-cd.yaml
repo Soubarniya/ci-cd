@@ -119,7 +119,13 @@ jobs:
       - name: Copy manifest to server
         run: |
           scp -o StrictHostKeyChecking=no ./k8s-deployment.yaml ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}: ./k8s-deployment.yaml
-      
+      - name: Build & Load Docker image into Minikube
+        run: |
+          eval $(minikube docker-env) # Point Docker CLI to Minikube
+          docker build -t go-api:latest .
+          kubectl create namespace staging || true
+          kubectl config set-context --current --namespace=staging
+          minikube image load go-api:latest # Load the image into Minikube
       
       - name: Deploy to Minikube
         run: |
