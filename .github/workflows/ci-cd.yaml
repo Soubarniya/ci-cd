@@ -124,11 +124,13 @@ jobs:
       - name: Copy manifest to server
         run: |
           scp -o StrictHostKeyChecking=no ./k8s-deployment.yaml ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}: ./k8s-deployment.yaml
-
+      
+      
       - name: Deploy to Minikube
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
-          minikube status
+          # Set up kubeconfig (Assuming Minikube uses the default config location)
+          export KUBECONFIG=$HOME/.kube/config
           kubectl apply -f ./k8s-deployment.yaml  # Adjust this path
           EOF
     
