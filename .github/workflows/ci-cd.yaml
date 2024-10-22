@@ -110,17 +110,20 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.REMOTE_SERVER_SSH_KEY }}
 
-      # - name: Copy kubeconfig to remote server
-      #   run: |
-      #     echo "${{ secrets.KUBECONFIG }}" > kubeconfig
-      #     # Ensure the .kube directory exists in the root user's home directory
-      #     ssh -o StrictHostKeyChecking=no -t ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} 'sudo mkdir -p /root/.kube'
-      #     # Copy kubeconfig to the remote server's .kube directory
-      #     scp -o StrictHostKeyChecking=no kubeconfig ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}:/root/.kube/config
+      - name: Copy manifest to server
+        run: |
+          scp -o StrictHostKeyChecking=no ./k8s-deployment.yaml ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}:/root/k8s-deployment.yaml
+
       - name: Deploy to Minikube
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
-          minikube start || true # Start Minikube if not already running
-          kubectl apply -f /root/test.yaml  # Adjust this path
+          minikube start || true  # Start Minikube if not already running
+          kubectl apply -f /root/k8s-deployment.yaml  # Adjust this path
+          EOF
+    
+      - name: Verify Deployment
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
+          kubectl get pods -n default
           EOF
 #changes 
