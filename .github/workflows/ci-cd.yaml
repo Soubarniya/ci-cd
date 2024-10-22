@@ -128,11 +128,22 @@ jobs:
           
       - name: Deploy to Minikube
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
-          # Set up kubeconfig (Assuming Minikube uses the default config location)
-          export KUBECONFIG=$HOME/.kube/config
-          kubectl apply -f ./k8s-deployment.yaml  # Adjust this path
-          EOF
+            ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
+            # Set up kubeconfig (Assuming Minikube uses the default config location)
+            export KUBECONFIG=$HOME/.kube/config
+    
+            # Check the current context
+            kubectl config current-context
+            
+            # Check if Minikube is running
+            minikube status
+            
+            # Apply the Kubernetes manifest
+            kubectl apply -f ~/k8s-deployment.yaml  # Ensure the path is correct
+    
+            # Print the status of all resources
+            kubectl get all -n default
+            EOF
     
       - name: Verify Deployment
         run: |
