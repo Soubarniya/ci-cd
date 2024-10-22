@@ -125,10 +125,10 @@ jobs:
         run: |
           scp -o StrictHostKeyChecking=no ./k8s-deployment.yaml ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}: ./k8s-deployment.yaml
 
-
+          
       - name: Deploy to Minikube
         run: |
-          ssh ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
           # Set up kubeconfig (Assuming Minikube uses the default config location)
           export KUBECONFIG=$HOME/.kube/config
           kubectl apply -f ./k8s-deployment.yaml  # Adjust this path
