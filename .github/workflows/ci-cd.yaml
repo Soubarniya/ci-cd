@@ -110,13 +110,13 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.REMOTE_SERVER_SSH_KEY }}
 
-      - name: Copy kubeconfig to remote server
-        run: |
-          echo "${{ secrets.KUBECONFIG }}" > kubeconfig
-          # Ensure the .kube directory exists in the root user's home directory
-          ssh -o StrictHostKeyChecking=no -t ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} 'sudo mkdir -p /root/.kube'
-          # Copy kubeconfig to the remote server's .kube directory
-          scp -o StrictHostKeyChecking=no kubeconfig ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}:/root/.kube/config
+      # - name: Copy kubeconfig to remote server
+      #   run: |
+      #     echo "${{ secrets.KUBECONFIG }}" > kubeconfig
+      #     # Ensure the .kube directory exists in the root user's home directory
+      #     ssh -o StrictHostKeyChecking=no -t ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} 'sudo mkdir -p /root/.kube'
+      #     # Copy kubeconfig to the remote server's .kube directory
+      #     scp -o StrictHostKeyChecking=no kubeconfig ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}:/root/.kube/config
       - name: Deploy to Minikube
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
