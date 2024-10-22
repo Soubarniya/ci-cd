@@ -111,6 +111,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up kubectl 
+        uses: azure/setup-kubectl@v3 
+        with: 
+          version: 'v1.27.1'
+          
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
@@ -123,7 +128,7 @@ jobs:
       - name: Deploy to Minikube
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
-          minikube start || true  # Start Minikube if not already running
+          minikube status
           kubectl apply -f ./k8s-deployment.yaml  # Adjust this path
           EOF
     
