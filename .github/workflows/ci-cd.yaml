@@ -70,15 +70,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Action SSH
-        id: action-ssh
-        uses: tiyee/action-ssh@v1.0.1
-        with:
-          host: ${{ secrets.HOST }} 
-          
-          username: ${{ secrets.REMOTE_SERVER_USER }} 
-          privateKey: ${{ secrets.REMOTE_SERVER_SSH_KEY }} 
-          command: 'ls -la'
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.LOCAL_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: SSH into local machine
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'echo "SSH access successful!"'
+
 
       - name: Copy manifest to server
         run: |
