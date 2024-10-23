@@ -72,7 +72,7 @@ jobs:
 
       - name: Set up SSH
         run: |
-          ssh "${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}"
+          ssh ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}
           mkdir -p ~/.ssh  # Create the .ssh directory if it doesn't exist
           echo "${{ secrets.REMOTE_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa  
           chmod 600 ~/.ssh/id_rsa  # Set correct permissions for the private key
