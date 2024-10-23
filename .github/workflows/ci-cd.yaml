@@ -72,8 +72,10 @@ jobs:
 
       - name: Set up SSH
         run: |
-          echo "${{ secrets.REMOTE_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          mkdir -p ~/.ssh  # Create the .ssh directory if it doesn't exist
+          echo "***" > ~/.ssh/id_rsa  # Replace *** with your private key or the secret reference
+          chmod 600 ~/.ssh/id_rsa  # Set correct permissions for the private key
+
 
       - name: Copy manifest to server
         run: |
