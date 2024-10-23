@@ -70,14 +70,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up SSH
-        run: |
-          echo "${{ secrets.REMOTE_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "${{ secrets.PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
-          chmod 644 ~/.ssh/id_rsa.pub
-          ssh-keyscan -H ${{ secrets.REMOTE_SERVER_IP }} >> ~/.ssh/known_hosts
-          ls -la && tree
+      - name: Action SSH
+        id: action-ssh
+        uses: tiyee/action-ssh@release
+        with:
+          host: ${{ secrets.HOST }} 
+          
+          username: ${{ secrets.REMOTE_SERVER_USER }} 
+          privateKey: ${{ secrets.REMOTE_SERVER_SSH_KEY }} 
+          command: 'ls -la'
 
       - name: Copy manifest to server
         run: |
