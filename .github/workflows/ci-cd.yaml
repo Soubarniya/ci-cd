@@ -62,7 +62,7 @@ jobs:
           sudo dpkg -i trivy_0.45.1_Linux-64bit.deb
       - name: Scan Docker image with Trivy
         run: |
-          trivy image soubarniya/go-api:latest
+          trivy image --skip-update soubarniya/go-api:latest
   deploy:
     runs-on: ubuntu-latest
     needs: scan_image
