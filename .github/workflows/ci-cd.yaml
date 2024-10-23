@@ -24,6 +24,7 @@ jobs:
         host: ${{ secrets.REMOTE_SERVER_IP }}           # Your bare metal server's public IP
         username: ${{ secrets.REMOTE_SERVER_USER }}        # Your server's SSH username
         key: ${{ secrets.REMOTE_SERVER_SSH_KEY }}       # Your SSH private key stored as a GitHub secret
+        debug: true
         script: |
           # Set the Minikube Docker environment
           eval $(minikube docker-env)
