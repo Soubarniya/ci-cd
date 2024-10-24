@@ -1,99 +1,45 @@
-name: CI/CD Pipeline
+name: Test Minikube Deployment
+
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
 jobs:
-  # build:
-  #   runs-on: ubuntu-latest
-  #   # needs: login
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Set up Go
-  #       uses: actions/setup-go@v5
-  #       with:
-  #         go-version: '1.23'
-
-  #     - name: Build Go API
-  #       run: go build -v
-      
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v3
-  #       with:
-  #         username: ${{ vars.DOCKERHUB_USERNAME }}
-  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-  #     - name: Build & Push Docker image
-  #       run: |
-  #         docker build -t soubarniya/go-api:latest .
-  #         docker push soubarniya/go-api:latest
-  # scan_code:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #   - uses: actions/checkout@v4
-  #     with:
-  #       # Disabling shallow clone is recommended for improving relevancy of reporting
-  #       fetch-depth: 0
-  #   - name: SonarCloud Scan
-  #     uses: sonarsource/sonarcloud-github-action@v3.1.0 # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/sonarcloud-scan
-  #     env:
-  #       SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
-  # scan_image:
-  #   runs-on: ubuntu-latest
-  #   needs: scan_code
-  #   steps:
-  #     - name: Cache Trivy DB
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: ~/.cache/trivy
-  #         key: ${{ runner.os }}-trivy-db
-
-  #     - name: Install Trivy
-  #       run: |
-  #         sudo apt-get update -y
-  #         sudo apt-get install -y wget
-  #         wget https://github.com/aquasecurity/trivy/releases/download/v0.45.1/trivy_0.45.1_Linux-64bit.deb
-  #         sudo dpkg -i trivy_0.45.1_Linux-64bit.deb
-  #     - name: Scan Docker image with Trivy
-  #       run: |
-  #         trivy image --skip-update soubarniya/go-api:latest
   deploy:
-    runs-on: ubuntu-latest
-    # needs: scan_image
+    runs-on: self-hosted
+
     steps:
-      - name: Checkout code
+      # Step 1: Checkout the repository code
+      - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Set up SSH
+      # Step 2: Set up kubectl for Minikube
+      - name: Set up kubectl for Minikube
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.LOCAL_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
+          # Ensure kubectl is using the Minikube context
+          kubectl config use-context minikube
+          # Verify the Minikube status
+          kubectl get nodes
 
-      - name: SSH into local machine
+      # Step 3: Apply a simple Kubernetes manifest (Pod)
+      - name: Deploy Test Pod
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'echo "SSH access successful!"'
-          ls -l
+          # Create a simple pod deployment YAML on the fly
+          echo "
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: test-pod
+          spec:
+            containers:
+            - name: nginx
+              image: nginx:latest
+              ports:
+              - containerPort: 80
+          " | kubectl apply -f -
 
-      - name: Copy manifest to server
+      # Step 4: Verify Pod Deployment
+      - name: Verify Pod is Running
         run: |
-          scp -o StrictHostKeyChecking=no ./k8s-deployment.yaml ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }}: ./k8s-deployment.yaml
-      - name: Deploy to Minikube
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
-          minikube start || true  # Start Minikube if not already running
-          kubectl apply -f /root/k8s-deployment.yaml  # Adjust this path
-          EOF
-    
-      - name: Verify Deployment
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USER }}@${{ secrets.REMOTE_SERVER_IP }} << 'EOF'
-          kubectl get pods -n default
-          EOF
+          kubectl get pods
