@@ -87,11 +87,13 @@ jobs:
           # kubectl config use-context minikube
           # Verify the Minikube status
           kubectl get nodes
+
       - name: Deploy Pod using YAML from repository
         run: |
           # Apply the YAML file stored in the repository
           ls
-          kubectl apply -f ./k8s-deployment.yaml    
+          kubectl apply -f ./k8s-deployment.yaml  
+          kubectl get svc  
       - name: Verify Pod is Running
         run: |
           kubectl get pods
