@@ -4,6 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: go-api
+  namespace: actions-runner-system
   labels:
     app: go-api
 spec:
