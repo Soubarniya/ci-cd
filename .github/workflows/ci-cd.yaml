@@ -90,6 +90,7 @@ jobs:
       - name: Deploy Pod using YAML from repository
         run: |
           # Apply the YAML file stored in the repository
+          ls
           kubectl apply -f ./k8s-deployment.yaml    
       - name: Verify Pod is Running
         run: |
