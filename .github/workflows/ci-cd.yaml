@@ -65,7 +65,7 @@ jobs:
           trivy image --skip-update soubarniya/go-api:latest
   deploy:
     runs-on: self-hosted
-    # needs: scan_image
+    needs: scan_image
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
