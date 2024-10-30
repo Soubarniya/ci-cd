@@ -84,7 +84,7 @@ jobs:
       - name: Set up kubectl for Minikube
         run: |
           # Ensure kubectl is using the Minikube context
-          # kubectl config use-context minikube
+          kubectl config use-context minikube
           # Verify the Minikube status
           kubectl get nodes
 
