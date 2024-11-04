@@ -1,101 +1,70 @@
-name: CI/CD Pipeline
+name: Build and Push Docker Image with Artifacts and Cache
+
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
-    # needs: login
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      # - name: Set up Go
-      #   uses: actions/setup-go@v5
-      #   with:
-      #     go-version: '1.23'
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.20'
 
-      # - name: Build Go API
-      #   run: go build -v
-      
-      - name: Login to Docker Hub
+      # Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Build binary
+        run: go build -o my-go-api ./cmd/my-go-api
+
+      # Upload build output as an artifact
+      - name: Upload binary as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-go-api-binary
+          path: my-go-api
+
+      # Optional: Cache Docker layers for faster rebuilds
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
+      # Log in to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & Push Docker image
-        run: |
-          docker build -t soubarniya/go-api .
-          docker push soubarniya/go-api
-#   scan_code:
-#     runs-on: ubuntu-latest
-#     needs: build
-#     steps:
-#     - uses: actions/checkout@v4
-#       with:
-#         # Disabling shallow clone is recommended for improving relevancy of reporting
-#         fetch-depth: 0
-#     - name: SonarCloud Scan
-#       uses: sonarsource/sonarcloud-github-action@v3.1.0 # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/sonarcloud-scan
-#       env:
-#         SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
-#   scan_image:
-#     runs-on: ubuntu-latest
-#     needs: scan_code
-#     steps:
-#       - name: Cache Trivy DB
-#         uses: actions/cache@v2
-#         with:
-#           path: ~/.cache/trivy
-#           key: ${{ runner.os }}-trivy-db
-
-#       - name: Install Trivy
-#         run: |
-#           sudo apt-get update -y
-#           sudo apt-get install -y wget
-#           wget https://github.com/aquasecurity/trivy/releases/download/v0.45.1/trivy_0.45.1_Linux-64bit.deb
-#           sudo dpkg -i trivy_0.45.1_Linux-64bit.deb
-#       - name: Scan Docker image with Trivy
-#         run: |
-#           trivy image --skip-update soubarniya/go-api:latest
-#   deploy:
-#     runs-on: self-hosted
-#     needs: scan_image
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
-
-#             # Step 2: Install kubectl
-#       - name: Install kubectl
-#         run: |
-#           # Download kubectl binary
-#           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-#           # Make it executable
-#           chmod +x kubectl
-#           # Move it to a directory in the PATH
-#           sudo mv kubectl /usr/local/bin/
-
-
-#       - name: Set up kubectl for Minikube
-#         run: |
-#           # Ensure kubectl is using the Minikube context
-#           # kubectl config use-context minikube
-#           # Verify the Minikube status
-#           kubectl get nodes
-
-#       - name: Deploy Pod using YAML from repository
-#         run: |
-#           # Apply the YAML file stored in the repository
-#           ls
-#           kubectl apply -f ./k8s-deployment.yaml  
-#           kubectl get svc  
-#       - name: Verify Pod is Running
-#         run: |
-#           kubectl get pods
-
-#
+      # Build and push Docker image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/my-go-api:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
