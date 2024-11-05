@@ -1,70 +1,56 @@
-name: Build and Push Docker Image with Artifacts and Cache
+name: Build and Cache Go Project
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # Step 1: Check out the code
+      - name: Check out code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Go environment
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
-          go-version: '1.20'
+          go-version: '1.23'
 
-      # Cache Go modules
+      # Step 3: Cache Go modules and build cache
       - name: Cache Go modules
         uses: actions/cache@v3
         with:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Install dependencies
-        run: go mod download
+      # Step 4: Build the Go project
+      - name: Build Go project
+        run: |
+          go mod tidy               # Ensure dependencies are up to date
+          go build -o go-api        # Build the application with the module name `go-api`
 
-      - name: Build binary
-        run: go build -o my-go-api ./cmd/my-go-api
-
-      # Upload build output as an artifact
-      - name: Upload binary as artifact
+      # Step 5: Upload the build artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
-          name: my-go-api-binary
-          path: my-go-api
+          name: go-api-binary
+          path: go-api               # Path to the binary
 
-      # Optional: Cache Docker layers for faster rebuilds
-      - name: Cache Docker layers
-        uses: actions/cache@v3
+      # Step 6: (Optional) Save coverage reports (if you generate one)
+      - name: Upload coverage report artifact
+        if: success()
+        uses: actions/upload-artifact@v3
         with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
-
-      # Log in to Docker Hub
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # Build and push Docker image
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/my-go-api:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache,mode=max
+          name: coverage-report
+          path: coverage.out        # Specify the path if you have a coverage report file
