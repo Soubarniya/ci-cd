@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - main  
-    paths:
-      - ci-cd/.github/workflows/go.yml
+    
 
 jobs:
   build:
