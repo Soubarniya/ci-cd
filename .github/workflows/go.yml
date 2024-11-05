@@ -3,7 +3,7 @@ name: Docker CI
 on:
   push:
     branches:
-      - main  # Change this to your main branch if it's not 'main'
+      - main  
     paths:
       - ci-cd/.github/workflows/go.yml
 
