@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main  # Trigger on main branch pushes
-
+    path:
+      - ci-cd/.github/workflows/go.yml
 permissions:
   contents: write
   pull-requests: write
