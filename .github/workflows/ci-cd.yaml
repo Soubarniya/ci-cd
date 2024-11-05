@@ -26,6 +26,11 @@ jobs:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
         password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
+    - name: Pull latest Docker Image
+      run: |
+        # Pull the latest image from Docker Hub
+        docker pull soubarniya/go-api:latest || echo "No existing latest image found, continuing..."
+
     - name: Build and Tag Docker Image
       id: build-image
       run: |
