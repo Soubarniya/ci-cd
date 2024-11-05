@@ -31,20 +31,30 @@ jobs:
       run: |
         # Get the current date in YYYYMMDD format for versioning
         VERSION=$(date +'%Y%m%d')
-        
+
         # Tag the old image with the version if it exists
         if [[ $(docker images -q soubarniya/go-api:latest) ]]; then
           docker tag soubarniya/go-api:latest soubarniya/go-api:${VERSION}
+          echo "Old image tagged as ${VERSION}."
+        else
+          echo "No latest image found to tag."
         fi
-        
-        # Build the new image
+
+        # Build the new image with the latest tag
         docker build -t soubarniya/go-api:latest .
+
+        # Output the version for later use
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
     - name: Push Docker Image
       run: |
+        # Push the latest image
         docker push soubarniya/go-api:latest
-        if [[ $(docker images -q soubarniya/go-api:${VERSION}) ]]; then
-          docker push soubarniya/go-api:${VERSION}
+
+        # Check if the versioned image exists and push it
+        if [[ $(docker images -q soubarniya/go-api:${{ env.VERSION }}) ]]; then
+          echo "Pushing versioned image ${VERSION}."
+          docker push soubarniya/go-api:${{ env.VERSION }}
+        else
+          echo "Versioned image ${VERSION} does not exist, skipping push."
         fi
-##
