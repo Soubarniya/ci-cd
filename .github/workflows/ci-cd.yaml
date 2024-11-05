@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - ci-cd/.github/workflows/ci-cd.yaml
+  paths:
+    - .github/workflows/ci-cd.yaml
 
 jobs:
   build:

@@ -47,3 +47,4 @@ jobs:
         if [[ $(docker images -q soubarniya/go-api:${VERSION}) ]]; then
           docker push soubarniya/go-api:${VERSION}
         fi
+##
