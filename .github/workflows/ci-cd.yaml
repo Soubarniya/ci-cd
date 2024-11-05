@@ -39,6 +39,7 @@ jobs:
         
         # Build the new image
         docker build -t soubarniya/go-api:latest .
+        echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
     - name: Push Docker Image
       run: |
